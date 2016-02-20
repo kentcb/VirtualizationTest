@@ -7,19 +7,19 @@ using System.Threading.Tasks;
 
 namespace VirtualisationTest.VMs
 {
-    public class EventsProvider : IPagedSourceProviderAsync<EventViewModel>
+    public class EventsProvider : IPagedSourceProviderAsync<EventGroupViewModel>
     {
-        PagedSourceItemsPacket<EventViewModel> IPagedSourceProvider<EventViewModel>.GetItemsAt(int pageoffset, int count, bool usePlaceholder)
+        PagedSourceItemsPacket<EventGroupViewModel> IPagedSourceProvider<EventGroupViewModel>.GetItemsAt(int pageoffset, int count, bool usePlaceholder)
         {
             throw new NotImplementedException();
         }
 
-        int IPagedSourceProvider<EventViewModel>.IndexOf(EventViewModel item)
+        int IPagedSourceProvider<EventGroupViewModel>.IndexOf(EventGroupViewModel item)
         {
             throw new NotImplementedException();
         }
 
-        int IPagedSourceProvider<EventViewModel>.Count
+        int IPagedSourceProvider<EventGroupViewModel>.Count
         {
             get { throw new NotImplementedException(); }
         }
@@ -29,29 +29,38 @@ namespace VirtualisationTest.VMs
             throw new NotImplementedException();
         }
 
-        public Task<PagedSourceItemsPacket<EventViewModel>> GetItemsAtAsync(int pageoffset, int count, bool usePlaceholder)
+        private static readonly Random random = new Random();
+        public async Task<PagedSourceItemsPacket<EventGroupViewModel>> GetItemsAtAsync(int pageoffset, int count, bool usePlaceholder)
         {
-            return Task.Delay(1000).ContinueWith(_ =>
-                new PagedSourceItemsPacket<EventViewModel> {
-                LoadedAt = DateTime.Now,
-                Items = Enumerable
-                    .Range(pageoffset, count)
-                    .Select(i => new EventViewModel("EVENT #" + i))
-                    .ToList()
-                });
+            await Task.Delay(1000);
+
+            return
+                new PagedSourceItemsPacket<EventGroupViewModel> {
+                    LoadedAt = DateTime.Now,
+                    Items = Enumerable
+                        .Range(pageoffset, count)
+                        .Select(i =>
+                            new EventGroupViewModel(
+                                DateTime.Now.AddDays(i).Date,
+                                Enumerable
+                                    .Range(0, random.Next(1, 10))
+                                    .Select(num => new EventViewModel("EVENT #" + num))
+                                    .ToList()))
+                        .ToList()};
         }
 
-        public EventViewModel GetPlaceHolder(int index, int page, int offset)
+        public EventGroupViewModel GetPlaceHolder(int index, int page, int offset)
         {
-            return EventViewModel.Placeholder;
+            return new EventGroupViewModel("Loading " + page + "/" + offset);
         }
 
-        public Task<int> GetCountAsync()
+        public async Task<int> GetCountAsync()
         {
-            return Task.Delay(5000).ContinueWith(_ => 10000);
+            await Task.Delay(1500);
+            return 10000;
         }
 
-        public Task<int> IndexOfAsync(EventViewModel item)
+        public Task<int> IndexOfAsync(EventGroupViewModel item)
         {
             return Task.FromResult(-1);
         }
@@ -59,26 +68,17 @@ namespace VirtualisationTest.VMs
     
     public class EventsViewModel : ReactiveObject
     {
-        private VirtualizingObservableCollection<EventViewModel> events;
+        private VirtualizingObservableCollection<EventGroupViewModel> events;
 
         public EventsViewModel()
         {
-            RxApp
-                .MainThreadScheduler
-                    .Schedule(
-                        (string)null,
-                        TimeSpan.FromSeconds(10),
-                        (scheduler, state) =>
-                        {
-                            this.Events = new VirtualizingObservableCollection<EventViewModel>(
-                                new EventsProvider(),
-                                pageSize: 10,
-                                maxPages: 10);
-                            return Disposable.Empty;
-                        });
+            this.Events = new VirtualizingObservableCollection<EventGroupViewModel>(
+                new EventsProvider(),
+                pageSize: 10,
+                maxPages: 10);
         }
 
-        public VirtualizingObservableCollection<EventViewModel> Events
+        public VirtualizingObservableCollection<EventGroupViewModel> Events
         {
             get { return this.events; }
             private set { this.RaiseAndSetIfChanged(ref this.events, value); }

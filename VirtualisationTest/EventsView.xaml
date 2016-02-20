@@ -1,17 +1,12 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="VirtualisationTest.EventsView">
     <ListView 
-        x:Name="eventsListView"
-        VerticalOptions="FillAndExpand"
-        CachingStrategy="RecycleElement"
-        SeparatorVisibility="Default"
-        RowHeight="110"
-        ItemsSource="{Binding Events, Mode=OneWay}">
+        ItemsSource="{Binding Events, Mode=OneWay}"
+        IsGroupingEnabled="true"
+        GroupDisplayBinding="{Binding DateDisplay}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ViewCell>
-                        <Label Text="{Binding Title}"/>
-                    </ViewCell>
+                    <TextCell Text="{Binding Title}"/>
                 </DataTemplate>
             </ListView.ItemTemplate>
     </ListView>
