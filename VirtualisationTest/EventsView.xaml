@@ -6,7 +6,7 @@
         CachingStrategy="RecycleElement"
         SeparatorVisibility="Default"
         RowHeight="110"
-        ItemsSource="{Binding Events}">
+        ItemsSource="{Binding Events, Mode=OneWay}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>

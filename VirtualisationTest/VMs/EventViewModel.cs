@@ -6,6 +6,8 @@ namespace VirtualisationTest.VMs
 {
     public class EventViewModel
     {
+        public static readonly EventViewModel Placeholder = new EventViewModel("LOADING");
+
         private readonly string title;
 
         public EventViewModel(string title)
